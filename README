@@ -1,0 +1,92 @@
+MODNQUEENS: The modified N queens problem solver
+================================================
+
+Description:
+The program MODNQUEENS takes one argument, an integer N, and returns a list of strings on stdout representing solutions to the modified N queens problem. The problem asks: how can one place N points (queens) on an NxN grid (or chessboard) such that the following constraints hold:
+
+1. No 2 points have an angle of 0, 45, or 90 degrees between them, and
+
+2. No 3 points are collinear
+
+
+Requirements:
+You'll need the latest version of Gradle 4.8 or better to run MODNQUEENS.
+
+
+How to run:
+In the top-level repository directory, run
+
+    ./gradlew run -Pn=[BOARD_SIZE]
+
+where BOARD_SIZE is a natural number. For example
+
+    
+Example:
+For the 4-queens problem,
+
+    ./gradlew run -Pn=4
+
+will produce something like:
+
+    1 3 0 2 
+    2 0 3 1 
+    
+Each row represents one solution. For instance, ``1 3 0 2'' would look like this on an a 4x4 chessboard
+
+    1 3 0 2
+    . . Q .
+    Q . . .
+    . . . Q
+    . Q . .
+
+That is, each number represents the row on which a queen is placed in that respective column.  The Qs are queens and .s are empty squares.
+
+
+Implementation notes:
+
+
+THE ROADS NOT TAKEN
+-------------------
+This Java program was the last of 4 approaches I tried while solving the modified N queens problem.
+
+  * At the start, I assumed that the N queens problem was so well-studied that I'd find a solution for this variant online. Unfortunately, the only  implementation I found (by one Miguel Ping) seemed to be specifically written for Compilerworks [1]. I decided not to look at that solution until after I'd submitted mine; if I was on a job then it'd be fair game.
+
+
+  * I then checked out the academic literature on the N queens problem, still thinking that the modified problem would have been solved previously. I found a survey paper [2] which showed i) a constructive solution to the standard N queens problem which would require no tree search at all, and ii) hinted at the possibility that the modified N queens problem was not solvable (since the Super-Queen, or Knight-Queen, problem only has solutions for very certain N). Hours more searching did not net me any papers directly discussing the modified N queens problem.
+
+
+  * Thus, I decided to simply write my own solution. The Wikipedia page on the N queens problem suggested two promising approaches: solving it using constraint-satisfaction, or depth-first search with backtracking. Thinking that constraint-satisfaction would lead to a shorter, more readable program, I explored that route first.
+
+I ended up using Google's Optimization Research library (OR-Tools). They have a sample N queens implementation using their library [4], which I modified to add an extra constraint for no-3-collinear queens (see `constraint-solution.py' in this directory, lines 25-30). I learned a couple of things from using their library:
+
+    a. Using a library whose data structures you didn't write (or which you're not very familiar with) makes debugging problems very difficult since it's not obvious where to instrument or even how control flows through the library. Along with their numerous sample programs, the library writers should include a sample debugging session.
+
+    b. OR-Tools is not in the Jcenter or Maven repositories. An alternative constraint-solving library, Choco Solver, is available there and I *had* considered using it, but I decided to go with OR-Tools since its constraint language was more readable. By the time I realized that OR-Tools wasn't available for automatic download, I was running out of time to finish the project.
+
+
+  * Since the project spec asked me to use Gradle; and since OR-Tools was unavailable via Jcenter and Maven; and since, in practice, I'd prefer hand-written code over library code if the handwritten code was reasonably short, and it meant not adding an extra dependency to the larger project...I thus decided to solve the modified N queens problem using straight Java.
+
+I based my code on a textbook solution of the ordinary N queens problem [5]. Pretty much all I did was add a test for whether any three queens were collinear.
+
+(Ironic that my final solution was based on backtracking, after I'd been backtracking through potential implementations for days :| )
+
+
+Mistakes:
+On reflection, I made some mistakes in my approach to this task:
+
+  * I assumed that a solution to the  modified N queens problem could be found in the literature. For work situations, that might be a fair assumption, but in a programming interview, its probably more likely that the problem has been chosen *specifically* to not have many existing solutions floating around the 'Net.
+
+  * Since I was so sure I'd find a  well-packaged or clever solution to the problem, I didn't leave enough time to create an automated test harness for my final solution. Tests that are hard to run don't get run. My compromise was to output each solution compactly i.e. on a single line, so that it'd be easy to visually check if the set of solutions coming from the program matched the expected solutions.
+
+You were right. If it took me this long to solve a variant of a problem that Wikipedia calls ``simple'' [3] then I probably couldn't even understand your tech challenges in just 72 hours.
+
+
+References:
+[1] https://github.com/mping/nqueens/tree/master
+[2] http://dx.doi.org/10.1016/j.disc.2007.12.043
+[3] https://en.wikipedia.org/wiki/Eight_queens_puzzle#Exercise_in_algorithm_design
+[4] https://developers.google.com/optimization/cp/queens
+[5] https://introcs.cs.princeton.edu/java/23recursion/Queens.java.html
+
+
+
